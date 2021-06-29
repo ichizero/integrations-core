@@ -309,6 +309,7 @@ ISTIOD_METRICS = {
     'sidecar_injection_skip_total': 'sidecar_injection.skip_total',
 }
 
+
 def construct_metrics_config(metric_map, type_overrides={}):
     metrics = []
     for raw_metric_name, metric_name in metric_map.items():
