@@ -347,6 +347,8 @@ MESH_METRICS_MAPPER = {
     'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
     'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
     'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
+    'istio_request_messages_total': 'request.messages.total',
+    'istio_response_messages_total': 'response.messages.total',
 }
 
 
