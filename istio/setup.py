@@ -29,6 +29,7 @@ def get_dependencies():
 
 CHECKS_BASE_REQ = 'datadog-checks-base>=16.4.0'
 
+
 setup(
     name='datadog-istio',
     version=ABOUT["__version__"],
