@@ -7,6 +7,7 @@ from os import environ
 import requests
 from openstack import connection
 from six.moves.urllib.parse import urljoin
+from six import PY3
 
 from .exceptions import (
     AuthenticationNeeded,
@@ -23,6 +24,9 @@ from .settings import (
     DEFAULT_NEUTRON_API_VERSION,
     DEFAULT_PAGINATED_LIMIT,
 )
+
+if PY3:
+
 
 UNSCOPED_AUTH = 'unscoped'
 
@@ -64,7 +68,7 @@ class AbstractApi(object):
     def get_projects(self):
         raise NotImplementedError()
 
-    def get_os_hypervisor_uptime(self, hypervisor_id):
+    def get_os_hypervisor_uptime(self, hypervisor):
         raise NotImplementedError()
 
     def get_os_aggregates(self):
@@ -213,10 +217,15 @@ class OpenstackSDKApi(AbstractApi):
 
         return self.connection.list_hypervisors()
 
-    def get_os_hypervisor_uptime(self, hypervisor_id):
-        # Hypervisor uptime is not available in openstacksdk 0.24.0.
-        self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
-        raise NotImplementedError()
+    def get_os_hypervisor_uptime(self, hypervisor):
+        if PY3:
+            if hypervisor.uptime is None:
+                self.connection.compute.get_hypervisor_uptime(hypervisor)
+            return hypervisor.uptime
+        else:
+            # Hypervisor uptime is not available in openstacksdk 0.24.0.
+            self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
+            raise NotImplementedError()
 
     def get_os_aggregates(self):
         # Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi
@@ -308,7 +317,8 @@ class SimpleApi(AbstractApi):
     def get_neutron_endpoint(self):
         self._make_request(self.neutron_endpoint)
 
-    def get_os_hypervisor_uptime(self, hyp_id):
+    def get_os_hypervisor_uptime(self, hypervisor):
+        hyp_id = hypervisor['id']
         url = '{}/os-hypervisors/{}/uptime'.format(self.nova_endpoint, hyp_id)
         resp = self._make_request(url)
         return resp.get('hypervisor', {}).get('uptime')
